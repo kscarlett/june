@@ -3,7 +3,7 @@
 ## CLI API
 
 ```sh
-june generate <input.md> [-o public/output.html] [--light/--dark/--style ./custom.css] [--template ./template.html] [--ugc]
+june generate <input.md> [-o public/output.html] [--light/--dark/--style ./custom.css] [--template ./template.html] [--ugc] [--watch]
                                 ^ give a default too   ^ switches theme                 ^ optional custom template    ^ sanitises markdown as UGC
 ```
 

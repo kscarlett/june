@@ -14,11 +14,19 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 )
 
+var (
+	// These are automatically filled in by goreleaser
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+)
+
 var CLI struct {
 	Generate struct {
 		Input  string `arg name:"file" help:"Input file to generate from." type:"existingfile"`
 		Output string `optional help:"Where to output the file." short:"o" default:"public/index.html" type:"path"`
 		Ugc    bool   `optional help:"Whether to treat the markdown as untrusted."`
+		Watch  bool   `optional help:"Watches for changes to your markdown and updates the html."`
 	} `cmd help:"Generate HTML output from Markdown file."`
 	Version struct {
 	} `cmd help:"Show the current version"`
@@ -35,7 +43,7 @@ func main() {
 		}))
 	switch ctx.Command() {
 	case "generate <file>":
-		Generate(CLI.Generate.Input, CLI.Generate.Output, CLI.Generate.Ugc)
+		Generate(CLI.Generate.Input, CLI.Generate.Output, CLI.Generate.Ugc, CLI.Generate.Watch)
 	case "version":
 		Version()
 	default:
@@ -43,7 +51,12 @@ func main() {
 	}
 }
 
-func Generate(input string, output string, ugc bool) {
+func Generate(input, output string, ugc, watch bool) {
+	fmt.Printf("watch: %v\n", watch)
+	if watch {
+		// keep doing this until told to exit
+	}
+
 	source, err := ioutil.ReadFile(input)
 	if err != nil {
 		panic(err)
@@ -79,5 +92,5 @@ func Generate(input string, output string, ugc bool) {
 }
 
 func Version() {
-	fmt.Printf("june %s - %s\n" /*version, build*/, "v0.0.0", "dev")
+	fmt.Printf("june version %s - commit %s (built at %s)\n", version, commit, date)
 }
