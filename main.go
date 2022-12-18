@@ -8,6 +8,7 @@ import (
 	"path"
 
 	"github.com/alecthomas/kong"
+	"github.com/microcosm-cc/bluemonday"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
@@ -63,7 +64,7 @@ func Generate(input, output string, ugc, watch bool) {
 	}
 
 	if _, err := os.Stat(output); os.IsNotExist(err) {
-		os.MkdirAll(path.Dir(output), 0700) // Create your file
+		os.MkdirAll(path.Dir(output), 0700) // Create the file
 	}
 
 	md := goldmark.New(
@@ -80,12 +81,17 @@ func Generate(input, output string, ugc, watch bool) {
 		panic(err)
 	}
 
+	generated := buf.Bytes()
+
 	fmt.Printf("ugc: %v\n", ugc)
 	if ugc {
 		// use bluemonday to sanitise
+		p := bluemonday.UGCPolicy()
+
+		generated = p.SanitizeBytes(generated)
 	}
 
-	err = ioutil.WriteFile(output, buf.Bytes(), 0644)
+	err = ioutil.WriteFile(output, generated, 0644)
 	if err != nil {
 		panic(err)
 	}
