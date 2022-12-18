@@ -29,7 +29,7 @@ brews:
     goarm: 6
 
     # Github repository to push the tap to.
-    github:
+    tap:
       owner: kscarlett
       name: homebrew-tap
 
