@@ -44,11 +44,11 @@ brews:
     # Default is the root folder.
     folder: Formula
 
-    homepage: "https://june.sh"
+    homepage: "https://june.run"
 
     license: "MIT"
 
-    description: "Single page static site generator."
+    description: "Super simple single page static site generator."
     # If set to auto, the release will not be uploaded to the homebrew tap
     # in case there is an indicator for prerelease in the tag e.g. v1.0.0-rc1
     # Default is false.

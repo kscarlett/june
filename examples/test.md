@@ -1,3 +1,8 @@
+---
+title: "test :)"
+description: "this is a longer description about the content on this page"
+lang: "es"
+---
 # Test
 
 This file is well and truly a test for the tool.
