@@ -94,7 +94,6 @@ archives:
     files:
       - LICENSE
       - README.md
-      - CHANGELOG.md # should generate this
       - examples/*
 
 checksum:
