@@ -4,12 +4,12 @@ June is a super simple single page static site generator for Markdown files, wri
 
 ## Features
 
-- **Markdown to HTML**: Converts Markdown files to static HTML using Go templates.
-- **Frontmatter Support**: Reads YAML frontmatter for metadata (title, description, etc).
-- **Custom Templates & Styles**: Use your own Go HTML templates and CSS, or rely on built-in defaults.
-- **User-Generated Content Mode**: Optionally sanitize output for untrusted Markdown.
-- **Watch Mode**: Automatically regenerate HTML when your Markdown file changes.
+- **Markdown to HTML**: Instantly convert Markdown files to static HTML.
+- **Content-focused**: Write your content as a regular Markdown file and get HTML out.
+- **Frontmatter Support**: Optionally add metadata like title, description, and language with YAML to enhance the output.
 - **Simple**: Fully self contained. Includes an embedded default template to let you generate pages with one binary and one Markdown file.
+- **Custom Templates & Styles**: Use your own Go HTML templates and CSS, or stick with the built-in defaults.
+- **User-Generated Content Mode**: Want to integrate June to publish untrusted Markdown? Enable a single flag to sanitise input.
 
 ## CLI Usage
 
