@@ -10,7 +10,7 @@ builds:
   - env:
       - CGO_ENABLED=0
     id: "june"
-    main: ./main.go
+    main: ./cmd/june/main.go
     binary: june
     goos:
       - darwin
