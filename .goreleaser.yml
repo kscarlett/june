@@ -1,5 +1,7 @@
 project_name: june
 
+version: 2
+
 before:
   hooks:
     - go mod tidy
@@ -29,7 +31,7 @@ brews:
     goarm: 6
 
     # Github repository to push the tap to.
-    tap:
+    repository:
       owner: kscarlett
       name: homebrew-tap
 
@@ -42,13 +44,13 @@ brews:
 
     # Folder inside the repository to put the formula.
     # Default is the root folder.
-    folder: Formula
+    directory: Formula
 
     homepage: "https://june.run"
 
     license: "MIT"
 
-    description: "Super simple single page static site generator."
+    description: "Super simple single page static site generator. Markdown in, HTML out, human and CI friendly."
     # If set to auto, the release will not be uploaded to the homebrew tap
     # in case there is an indicator for prerelease in the tag e.g. v1.0.0-rc1
     # Default is false.
@@ -64,15 +66,18 @@ brews:
     test: system "#{bin}/june version"
 
 archives:
-  - replacements:
-      darwin: MacOS
-      linux: Linux
-      windows: Windows
-      amd64: x84_64
+  - id: release
+    name_template: >-
+      {{- .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end -}}
     wrap_in_directory: true
     format_overrides:
       - goos: windows
-        format: zip
+        formats: [ 'zip' ]
     files:
       - LICENSE
       - README.md
@@ -83,7 +88,7 @@ checksum:
   name_template: "checksums.txt"
 
 snapshot:
-  name_template: "{{ .Tag }}-SNAPSHOT-{{ .ShortCommit }}"
+  version_template: "{{ .Tag }}-SNAPSHOT-{{ .ShortCommit }}"
 
 release:
   github:
