@@ -65,6 +65,19 @@ brews:
     # Default is empty.
     test: system "#{bin}/june version"
 
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^build:"
+      - "^cleanup:"
+      - "^release:"
+      - merge
+      - typo
+
 archives:
   - id: release
     name_template: >-
@@ -97,14 +110,3 @@ release:
   prerelease: auto
   name_template: "{{.Tag}}"
 
-changelog:
-  sort: asc
-  filters:
-    exclude:
-      - "^docs:"
-      - "^test:"
-      - "^build:"
-      - "^cleanup:"
-      - "^release:"
-      - merge
-      - typo
