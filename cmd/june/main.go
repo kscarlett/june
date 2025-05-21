@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/alecthomas/kong"
 	"github.com/kscarlett/june/internal/generate"
@@ -37,10 +40,18 @@ func main() {
 			Compact: true,
 			Summary: true,
 		}))
+
 	switch ctx.Command() {
 	case "generate <file>":
 		if CLI.Generate.Watch {
+			// Set up context that cancels on interrupt signal (Ctrl+C)
+			ctx, cancel := signal.NotifyContext(
+				context.Background(),
+				os.Interrupt, syscall.SIGTERM,
+			)
+			defer cancel()
 			if err := watch.Run(
+				ctx,
 				CLI.Generate.Input,
 				CLI.Generate.Output,
 				CLI.Generate.Ugc,

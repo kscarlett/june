@@ -1,6 +1,7 @@
 package watch
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -8,7 +9,7 @@ import (
 	"github.com/kscarlett/june/internal/generate"
 )
 
-func Run(input, output string, ugc bool, stylePath, templatePath string) error {
+func Run(ctx context.Context, input, output string, ugc bool, stylePath, templatePath string) error {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return fmt.Errorf("error setting up watcher: %w", err)
@@ -33,6 +34,8 @@ func Run(input, output string, ugc bool, stylePath, templatePath string) error {
 
 	for {
 		select {
+		case <-ctx.Done():
+			return ctx.Err()
 		case event, ok := <-watcher.Events:
 			if !ok {
 				// Watcher channel closed
@@ -61,6 +64,4 @@ func Run(input, output string, ugc bool, stylePath, templatePath string) error {
 			fmt.Println("Watcher error:", err)
 		}
 	}
-	// Unreachable in the current loop structure, but good form if loop could exit.
-	// return nil
 }

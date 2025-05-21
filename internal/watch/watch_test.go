@@ -1,9 +1,10 @@
 package watch
 
 import (
+	"context"
 	"path/filepath"
 	"testing"
-	// "os" // Required for os.IsNotExist if we check specific errors - removed as unused
+	"time"
 )
 
 func TestRun_WatcherAddError(t *testing.T) {
@@ -14,7 +15,9 @@ func TestRun_WatcherAddError(t *testing.T) {
 	// fsnotify.Watcher.Add() should fail for paths that do not exist.
 	nonExistentFilePath := filepath.Join(tempDir, "this_file_does_not_exist.md")
 
-	err := Run(nonExistentFilePath, dummyOutputPath, false, "", "")
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	err := Run(ctx, nonExistentFilePath, dummyOutputPath, false, "", "")
 	if err == nil {
 		t.Errorf("Run() with nonExistentFilePath %q expected an error due to watcher.Add failure, but got nil", nonExistentFilePath)
 	} else {
@@ -29,7 +32,9 @@ func TestRun_WatcherAddError(t *testing.T) {
 	// Case 2: Test with an empty string path.
 	// This is often an invalid path for OS file operations.
 	emptyPath := ""
-	err = Run(emptyPath, dummyOutputPath, false, "", "")
+	ctx2, cancel2 := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel2()
+	err = Run(ctx2, emptyPath, dummyOutputPath, false, "", "")
 	if err == nil {
 		t.Errorf("Run() with empty input path expected an error, but got nil")
 	} else {
