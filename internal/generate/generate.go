@@ -56,11 +56,20 @@ func parseMarkdown(input []byte) (PageMeta, []byte, error) {
 
 	var metadata PageMeta
 	d := frontmatter.Get(ctx)
-	if err := d.Decode(&metadata); err != nil {
-		return PageMeta{}, nil, fmt.Errorf("error decoding frontmatter: %w", err)
-	}
-	if metadata.Lang == "" {
+
+	if d == nil {
+		// No frontmatter found, set defaults
 		metadata.Lang = "en"
+		// Other fields (Title, Desc, Tags) will be their zero values
+	} else {
+		// Frontmatter exists, try to decode it
+		if err := d.Decode(&metadata); err != nil {
+			return PageMeta{}, nil, fmt.Errorf("error decoding frontmatter: %w", err)
+		}
+		// Ensure lang defaults to "en" if specified as empty in frontmatter
+		if metadata.Lang == "" {
+			metadata.Lang = "en"
+		}
 	}
 
 	return metadata, buf.Bytes(), nil
@@ -74,20 +83,26 @@ type GenerateConfig struct {
 	Ugc      bool
 }
 
-func Generate(cfg GenerateConfig) {
+func Generate(cfg GenerateConfig) error {
 	source, err := os.ReadFile(cfg.Input)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("failed to read input file %s: %w", cfg.Input, err)
 	}
 
-	if _, err := os.Stat(cfg.Output); os.IsNotExist(err) {
-		os.MkdirAll(path.Dir(cfg.Output), 0700)
+	// Ensure output directory exists
+	outputDir := path.Dir(cfg.Output)
+	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(outputDir, 0755); err != nil { // Changed mode to 0755 for directories
+			return fmt.Errorf("failed to create output directory %s: %w", outputDir, err)
+		}
+	} else if err != nil {
+		return fmt.Errorf("failed to stat output directory %s: %w", outputDir, err)
 	}
+
 
 	metadata, generated, err := parseMarkdown(source)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return fmt.Errorf("failed to parse markdown: %w", err)
 	}
 
 	if cfg.Ugc {
@@ -95,13 +110,14 @@ func Generate(cfg GenerateConfig) {
 		generated = p.SanitizeBytes(generated)
 	}
 
-	tmplBytes := templatex.LoadTemplate(cfg.Template)
-	styleBytes := templatex.LoadStyle(cfg.Style)
-	css := string(styleBytes)
-
-	tmpl, err := template.New("page").Parse(string(tmplBytes))
+	tmpl, err := templatex.LoadTemplate(cfg.Template)
 	if err != nil {
-		panic(fmt.Sprintf("failed to parse template: %v", err))
+		return fmt.Errorf("failed to load template: %w", err)
+	}
+
+	css, err := templatex.LoadStyle(cfg.Style)
+	if err != nil {
+		return fmt.Errorf("failed to load style: %w", err)
 	}
 
 	data := struct {
@@ -116,12 +132,13 @@ func Generate(cfg GenerateConfig) {
 
 	var out bytes.Buffer
 	if err := tmpl.Execute(&out, data); err != nil {
-		panic(fmt.Sprintf("failed to execute template: %v", err))
+		return fmt.Errorf("failed to execute template: %w", err)
 	}
 
 	err = os.WriteFile(cfg.Output, out.Bytes(), 0644)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("failed to write output file %s: %w", cfg.Output, err)
 	}
 	fmt.Printf("Successfully wrote to %s\n", cfg.Output)
+	return nil
 }

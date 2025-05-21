@@ -1,7 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/alecthomas/kong"
 	"github.com/kscarlett/june/internal/generate"
@@ -36,24 +40,38 @@ func main() {
 			Compact: true,
 			Summary: true,
 		}))
+
 	switch ctx.Command() {
 	case "generate <file>":
 		if CLI.Generate.Watch {
-			watch.Run(
+			// Set up context that cancels on interrupt signal (Ctrl+C)
+			ctx, cancel := signal.NotifyContext(
+				context.Background(),
+				os.Interrupt, syscall.SIGTERM,
+			)
+			defer cancel()
+			if err := watch.Run(
+				ctx,
 				CLI.Generate.Input,
 				CLI.Generate.Output,
 				CLI.Generate.Ugc,
 				CLI.Generate.Style,
 				CLI.Generate.Template,
-			)
+			); err != nil {
+				fmt.Fprintln(os.Stderr, "Error starting watcher:", err)
+				os.Exit(1)
+			}
 		} else {
-			generate.Generate(generate.GenerateConfig{
+			if err := generate.Generate(generate.GenerateConfig{
 				Input:    CLI.Generate.Input,
 				Output:   CLI.Generate.Output,
 				Style:    CLI.Generate.Style,
 				Template: CLI.Generate.Template,
 				Ugc:      CLI.Generate.Ugc,
-			})
+			}); err != nil {
+				fmt.Fprintln(os.Stderr, "Error:", err)
+				os.Exit(1)
+			}
 		}
 	case "version":
 		fmt.Println(generate.VersionString())
