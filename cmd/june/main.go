@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/alecthomas/kong"
 	"github.com/kscarlett/june/internal/generate"
@@ -39,21 +40,27 @@ func main() {
 	switch ctx.Command() {
 	case "generate <file>":
 		if CLI.Generate.Watch {
-			watch.Run(
+			if err := watch.Run(
 				CLI.Generate.Input,
 				CLI.Generate.Output,
 				CLI.Generate.Ugc,
 				CLI.Generate.Style,
 				CLI.Generate.Template,
-			)
+			); err != nil {
+				fmt.Fprintln(os.Stderr, "Error starting watcher:", err)
+				os.Exit(1)
+			}
 		} else {
-			generate.Generate(generate.GenerateConfig{
+			if err := generate.Generate(generate.GenerateConfig{
 				Input:    CLI.Generate.Input,
 				Output:   CLI.Generate.Output,
 				Style:    CLI.Generate.Style,
 				Template: CLI.Generate.Template,
 				Ugc:      CLI.Generate.Ugc,
-			})
+			}); err != nil {
+				fmt.Fprintln(os.Stderr, "Error:", err)
+				os.Exit(1)
+			}
 		}
 	case "version":
 		fmt.Println(generate.VersionString())
